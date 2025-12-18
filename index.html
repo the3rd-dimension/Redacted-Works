@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redacted Works Studio</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#0a0a0a',
+                        acid: '#4ade80',
+                    },
+                    fontFamily: {
+                        mono: ['"Courier New"', 'Courier', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Reset */
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor */
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4ade80;
+        }
+
+        /* Custom Cursor */
+        #cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #4ade80;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        
+        #cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: #4ade80;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+
+        #cursor.hovered {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(74, 222, 128, 0.1);
+            border-color: #ffffff;
+        }
+
+        /* Three.js Background */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* Glitch Effect Classes */
+        .glitch-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glitch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(74, 222, 128, 0.2) 3px,
+                rgba(74, 222, 128, 0.2) 4px
+            );
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .project-card:hover .glitch-overlay {
+            opacity: 1;
+        }
+
+        /* Live Signal Animation */
+        .live-signal {
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+
+        /* Redaction Effect */
+        .redact-reveal {
+            position: relative;
+            display: inline-block;
+        }
+        .redact-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            transform-origin: left;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="font-mono selection:bg-acid selection:text-black">
+
+    <div id="cursor"></div>
+
+    <div id="canvas-container"></div>
+
+    <nav class="fixed top-0 w-full z-50 backdrop-blur-md bg-black/30 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-xl font-bold tracking-tighter hover-trigger text-white">
+                REDACTED<span class="text-acid">.WORKS</span>
+            </a>
+            <div class="hidden md:flex space-x-8 text-sm">
+                <a href="#about" class="hover:text-acid transition-colors hover-trigger">About</a>
+                <a href="#games" class="hover:text-acid transition-colors hover-trigger">Projects</a>
+                <a href="#team" class="hover:text-acid transition-colors hover-trigger">Team</a>
+                <a href="#contact" class="hover:text-acid transition-colors hover-trigger">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="h-screen flex flex-col justify-center items-center relative px-4">
+        <div class="text-center z-10">
+            <p class="text-acid text-sm mb-4 tracking-[0.2em] opacity-0" id="hero-subtitle">EST. UNREAL ENGINE 5</p>
+            <h1 class="text-6xl md:text-9xl font-bold tracking-tighter mb-6 scramble-text">
+                REDACTED
+            </h1>
+            <p class="text-gray-400 max-w-xl mx-auto text-lg typewriter-hero h-8">
+                </p>
+        </div>
+        
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+            <p class="text-xs text-gray-500">SCROLL TO DECRYPT</p>
+        </div>
+    </section>
+
+    <section id="about" class="py-24 border-t border-white/5 relative bg-black/50">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="flex items-center gap-4 mb-12">
+                <div class="h-[1px] w-12 bg-acid"></div>
+                <h2 class="text-3xl font-bold text-white">MISSION_STATUS</h2>
+            </div>
+            
+            <div class="gsap-fade-up">
+                <p class="text-xl md:text-2xl leading-relaxed text-gray-300 font-light" id="mission-text">
+                    <span class="text-acid">></span> Redacted Works is a Game Dev Studio. We make games for passion. 
+                    We utilize the power of <span class="text-white font-bold border-b border-acid">Unreal Engine 5</span> for development.
+                    Our philosophy focuses on atmospheric storytelling and immersive mechanics.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 mt-16 border-t border-white/10 pt-8 gsap-fade-up">
+                <div>
+                    <h3 class="text-gray-500 text-xs uppercase mb-2">Engine</h3>
+                    <p class="text-lg">Unreal Engine 5</p>
+                </div>
+                <div>
+                    <h3 class="text-gray-500 text-xs uppercase mb-2">Focus</h3>
+                    <p class="text-lg">Atmosphere</p>
+                </div>
+                <div>
+                    <h3 class="text-gray-500 text-xs uppercase mb-2">Status</h3>
+                    <p class="text-acid">Operational</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="games" class="py-24 px-6 relative">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-5xl font-bold mb-16 text-right border-b border-white/10 pb-4">
+                PROJECT_INDEX <span class="text-acid text-lg align-top">02</span>
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="project-card group relative border border-white/10 bg-white/5 overflow-hidden hover-trigger h-96 gsap-fade-up">
+                    <div class="absolute inset-0 bg-gray-900 z-0">
+                        <div class="w-full h-full opacity-40 bg-[url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center transition-transform duration-700 group-hover:scale-110"></div>
+                    </div>
+                    
+                    <div class="glitch-overlay"></div>
+                    
+                    <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black via-black/90 to-transparent z-10">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-acid transition-colors">SCP CB UE5 Edition</h3>
+                                <p class="text-gray-400 text-sm max-w-xs">A complete port of the original SCP Containment Breach into UE5 with graphical improvements and addons.</p>
+                            </div>
+                            <span class="text-4xl text-white/10 font-bold group-hover:text-acid/20">01</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card group relative border border-white/10 bg-white/5 overflow-hidden hover-trigger h-96 gsap-fade-up">
+                    <div class="absolute inset-0 bg-gray-900 z-0">
+                        <div class="w-full h-full opacity-40 bg-[url('https://images.unsplash.com/photo-1616719818817-817651a2cb84?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center transition-transform duration-700 group-hover:scale-110"></div>
+                    </div>
+
+                    <div class="glitch-overlay"></div>
+
+                    <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black via-black/90 to-transparent z-10">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-acid transition-colors">SCP: ER</h3>
+                                <p class="text-gray-400 text-sm max-w-xs">A multiplayer SCP game where players play as characters from the SCP universe.</p>
+                            </div>
+                            <span class="text-4xl text-white/10 font-bold group-hover:text-acid/20">02</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="team" class="py-24 border-t border-white/10 bg-black">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-start mb-16">
+                <h2 class="text-4xl font-bold">OPERATIVES</h2>
+                <p class="text-gray-500 mt-2 md:mt-0 max-w-sm text-right">
+                    The minds behind the redaction. <br> Specialists in Audio, 3D, and Code.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="border border-white/10 p-6 hover:border-acid/50 transition-colors duration-300 gsap-fade-up hover-trigger bg-white/[0.02]">
+                    <div class="h-2 w-2 bg-acid mb-4 rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-1">Bartosz Kotecki</h3>
+                    <p class="text-xs text-acid mb-4 uppercase tracking-wider">Director & Founder</p>
+                </div>
+
+                <div class="border border-white/10 p-6 hover:border-acid/50 transition-colors duration-300 gsap-fade-up hover-trigger bg-white/[0.02]">
+                    <div class="h-2 w-2 bg-gray-600 mb-4 rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-1">The 3rd Dimension</h3>
+                    <p class="text-xs text-gray-400 mb-4 uppercase tracking-wider">Senior Programmer & 3D</p>
+                </div>
+
+                <div class="border border-white/10 p-6 hover:border-acid/50 transition-colors duration-300 gsap-fade-up hover-trigger bg-white/[0.02]">
+                    <div class="h-2 w-2 bg-gray-600 mb-4 rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-1">jagaaa</h3>
+                    <p class="text-xs text-gray-400 mb-4 uppercase tracking-wider">Programmer & Audio</p>
+                </div>
+
+                <div class="border border-white/10 p-6 hover:border-acid/50 transition-colors duration-300 gsap-fade-up hover-trigger bg-white/[0.02]">
+                    <div class="h-2 w-2 bg-gray-600 mb-4 rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-1">SKYER</h3>
+                    <p class="text-xs text-gray-400 mb-4 uppercase tracking-wider">3D Artist</p>
+                </div>
+                
+                <div class="border border-white/10 p-6 hover:border-acid/50 transition-colors duration-300 gsap-fade-up hover-trigger bg-white/[0.02]">
+                    <div class="h-2 w-2 bg-gray-600 mb-4 rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-1">A4110</h3>
+                    <p class="text-xs text-gray-400 mb-4 uppercase tracking-wider">Music & Audio</p>
+                </div>
+
+                <div class="border border-white/10 p-6 hover:border-acid/50 transition-colors duration-300 gsap-fade-up hover-trigger bg-white/[0.02]">
+                    <div class="h-2 w-2 bg-gray-600 mb-4 rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-1">Alex1101</h3>
+                    <p class="text-xs text-gray-400 mb-4 uppercase tracking-wider">Music & Audio</p>
+                </div>
+                 
+                <div class="border border-white/10 p-6 hover:border-acid/50 transition-colors duration-300 gsap-fade-up hover-trigger bg-white/[0.02]">
+                    <div class="h-2 w-2 bg-gray-600 mb-4 rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-1">PartyX01</h3>
+                    <p class="text-xs text-gray-400 mb-4 uppercase tracking-wider">Concept Artist</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="bg-black pt-24 pb-12 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+                <h2 class="text-3xl font-bold mb-6">ESTABLISH UPLINK</h2>
+                <form class="space-y-4">
+                    <input type="email" placeholder="ENTER EMAIL" class="w-full bg-white/5 border border-white/10 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-acid transition-colors hover-trigger">
+                    <textarea placeholder="TRANSMISSION MESSAGE" rows="4" class="w-full bg-white/5 border border-white/10 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-acid transition-colors hover-trigger"></textarea>
+                    <button type="button" class="bg-acid text-black font-bold py-3 px-8 hover:bg-white transition-colors hover-trigger">SEND_DATA</button>
+                </form>
+            </div>
+            
+            <div class="flex flex-col justify-between">
+                <div>
+                    <h3 class="text-gray-500 text-sm mb-4">SOCIAL_CHANNELS</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-acid hover-trigger">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-acid hover-trigger">Discord Server</a></li>
+                        <li><a href="#" class="hover:text-acid hover-trigger">YouTube</a></li>
+                    </ul>
+                </div>
+                
+                <div class="mt-12 flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full bg-acid live-signal"></div>
+                    <span class="text-acid text-sm tracking-widest">LIVE SIGNAL ACQUIRED</span>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-24 text-gray-800 text-xs">
+            © 2024 REDACTED WORKS. ALL RIGHTS RESERVED.
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. Custom Cursor Logic ---
+            const cursor = document.getElementById('cursor');
+            
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+
+            const interactiveElements = document.querySelectorAll('.hover-trigger');
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+            });
+
+            // --- 2. Three.js Background (Data Core) ---
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x0a0a0a, 0.002);
+            
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Create Particles
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 2000;
+            const posArray = new Float32Array(particlesCount * 3);
+
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 100;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+            // Material - Acid Green
+            const material = new THREE.PointsMaterial({
+                size: 0.15,
+                color: 0x4ade80,
+                transparent: true,
+                opacity: 0.8,
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, material);
+            scene.add(particlesMesh);
+
+            // Mouse Interaction Variables
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetX = 0;
+            let targetY = 0;
+
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX);
+                mouseY = (event.clientY - windowHalfY);
+            });
+
+            // Animation Loop
+            const clock = new THREE.Clock();
+
+            function animate() {
+                targetX = mouseX * 0.001;
+                targetY = mouseY * 0.001;
+
+                particlesMesh.rotation.y += 0.05 * (targetX - particlesMesh.rotation.y);
+                particlesMesh.rotation.x += 0.05 * (targetY - particlesMesh.rotation.x);
+                particlesMesh.rotation.z += 0.001; // Constant slow rotation
+
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            // Resize Handler
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // --- 3. GSAP Animations ---
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Text Scramble Effect for Hero Title
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+            const title = document.querySelector('.scramble-text');
+            const originalText = title.innerText;
+            
+            let iterations = 0;
+            const interval = setInterval(() => {
+                title.innerText = title.innerText.split("")
+                    .map((letter, index) => {
+                        if(index < iterations) {
+                            return originalText[index];
+                        }
+                        return chars[Math.floor(Math.random() * chars.length)]
+                    })
+                    .join("");
+                
+                if(iterations >= originalText.length){ 
+                    clearInterval(interval);
+                }
+                iterations += 1/3; 
+            }, 30);
+
+            // Subtitle Reveal
+            gsap.to('#hero-subtitle', {
+                opacity: 1,
+                duration: 2,
+                delay: 1,
+                ease: "power2.out"
+            });
+
+            // Typewriter Effect for Hero Description
+            const heroText = "Developing High-Quality Experiences within the SCP Universe.";
+            const heroTypewriter = document.querySelector('.typewriter-hero');
+            let typeIndex = 0;
+            
+            function typeWriter() {
+                if (typeIndex < heroText.length) {
+                    heroTypewriter.innerHTML += heroText.charAt(typeIndex);
+                    typeIndex++;
+                    setTimeout(typeWriter, 50);
+                }
+            }
+            setTimeout(typeWriter, 1500);
+
+            // ScrollTrigger for Sections
+            const fadeElements = document.querySelectorAll('.gsap-fade-up');
+            
+            fadeElements.forEach(element => {
+                gsap.fromTo(element, 
+                    { 
+                        opacity: 0, 
+                        y: 50 
+                    },
+                    {
+                        opacity: 1, 
+                        y: 0, 
+                        duration: 1,
+                        ease: "power4.out",
+                        scrollTrigger: {
+                            trigger: element,
+                            start: "top 85%",
+                        }
+                    }
+                );
+            });
+        });
+    </script>
+</body>
+</html>
