@@ -42,7 +42,9 @@
             <div class="hidden md:flex space-x-8 text-sm">
                 <a href="#about" class="hover:text-acid transition-colors hover-trigger">About</a>
                 <a href="#games" class="hover:text-acid transition-colors hover-trigger">Projects</a>
+                <a href="#announcements" class="hover:text-acid transition-colors hover-trigger">Announcements</a>
                 <a href="#team" class="hover:text-acid transition-colors hover-trigger">Team</a>
+                <a href="#admin" class="hover:text-acid transition-colors hover-trigger">Admin</a>
                 <a href="#contact" class="hover:text-acid transition-colors hover-trigger">Contact</a>
             </div>
         </div>
@@ -102,44 +104,7 @@
                 PROJECT_INDEX <span class="text-acid text-lg align-top">02</span>
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
-                <div class="project-card group relative border border-white/10 bg-white/5 overflow-hidden hover-trigger h-96 gsap-fade-up">
-                    <div class="absolute inset-0 bg-gray-900 z-0">
-                        <div class="w-full h-full opacity-40 bg-[url('Assets/Media/SCP_CB_Cover.png')] bg-cover bg-center transition-transform duration-700 group-hover:scale-110"></div>
-                    </div>
-                    
-                    <div class="glitch-overlay"></div>
-                    
-                    <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black via-black/90 to-transparent z-10">
-                        <div class="flex justify-between items-end">
-                            <div>
-                                <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-acid transition-colors">SCP CB UE5 Edition</h3>
-                                <p class="text-gray-400 text-sm max-w-xs">A complete port of the original SCP Containment Breach into UE5 with graphical improvements and addons.</p>
-                            </div>
-                            <span class="text-4xl text-white/10 font-bold group-hover:text-acid/20">01</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="project-card group relative border border-white/10 bg-white/5 overflow-hidden hover-trigger h-96 gsap-fade-up">
-                    <div class="absolute inset-0 bg-gray-900 z-0">
-                        <div class="w-full h-full opacity-40 bg-cover bg-cover bg-center transition-transform duration-700 group-hover:scale-110"  style="background-image: url('Assets/Media/SCP_ER_Cover.png')"></div>
-                    </div>
-
-                    <div class="glitch-overlay"></div>
-
-                    <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black via-black/90 to-transparent z-10">
-                        <div class="flex justify-between items-end">
-                            <div>
-                                <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-acid transition-colors">SCP: ER</h3>
-                                <p class="text-gray-400 text-sm max-w-xs">A multiplayer SCP game where players play as characters from the SCP universe.</p>
-                            </div>
-                            <span class="text-4xl text-white/10 font-bold group-hover:text-acid/20">02</span>
-                        </div>
-                    </div>
-                </div>
-
+            <div id="projects-list" class="grid grid-cols-1 md:grid-cols-2 gap-8">
             </div>
         </div>
     </section>
@@ -157,7 +122,7 @@
             </a>
         </div>
 
-        <div class="flex flex-col space-y-4">
+        <div id="announcements-list" class="flex flex-col space-y-4">
             
             <div class="group relative bg-white/[0.03] border-l-2 border-white/10 hover:border-acid p-6 transition-all duration-300 hover:bg-white/[0.05] hover-trigger gsap-fade-up">
                 <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
@@ -226,7 +191,7 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div id="team-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="border border-white/10 p-6 hover:border-acid/50 transition-colors duration-300 gsap-fade-up hover-trigger bg-white/[0.02]">
                     <div class="h-2 w-2 bg-pink-600 mb-4 rounded-full"></div>
                     <h3 class="text-xl font-bold mb-1">Bartosz Kotecki</h3>
@@ -267,6 +232,65 @@
                     <div class="h-2 w-2 bg-orange-600 mb-4 rounded-full"></div>
                     <h3 class="text-xl font-bold mb-1">PartyX01</h3>
                     <p class="text-xs text-gray-400 mb-4 uppercase tracking-wider">Concept Artist</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="admin" class="py-24 border-t border-white/10 bg-black/80">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-6 mb-12 border-b border-white/10 pb-4">
+                <div>
+                    <p class="text-acid text-xs font-bold tracking-[0.2em] mb-2">ADMIN ACCESS</p>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white">CONTENT CONTROL</h2>
+                </div>
+                <button id="admin-logout" type="button" class="admin-secondary-button hover-trigger hidden">LOG OUT</button>
+            </div>
+
+            <div id="admin-login" class="admin-panel max-w-xl">
+                <h3 class="text-2xl font-bold mb-6">LOGIN</h3>
+                <form id="login-form" class="space-y-4">
+                    <input id="admin-username" type="text" autocomplete="username" placeholder="USERNAME" class="admin-input hover-trigger" required>
+                    <input id="admin-password" type="password" autocomplete="current-password" placeholder="PASSWORD" class="admin-input hover-trigger" required>
+                    <button type="submit" class="admin-primary-button hover-trigger">ENTER ADMIN MODE</button>
+                    <p id="login-message" class="text-sm text-acid min-h-5"></p>
+                </form>
+                <p class="text-xs text-gray-600 mt-6">This section is only for Admin Usage</p>
+            </div>
+
+            <div id="admin-dashboard" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <form id="announcement-form" class="admin-panel space-y-4">
+                        <h3 class="text-xl font-bold">NEW ANNOUNCEMENT</h3>
+                        <input name="date" type="date" class="admin-input hover-trigger" required>
+                        <input name="tag" type="text" placeholder="TAG" class="admin-input hover-trigger" required>
+                        <input name="title" type="text" placeholder="TITLE" class="admin-input hover-trigger" required>
+                        <textarea name="body" rows="5" placeholder="POST TEXT" class="admin-input hover-trigger" required></textarea>
+                        <button type="submit" class="admin-primary-button hover-trigger">POST ANNOUNCEMENT</button>
+                    </form>
+
+                    <form id="team-form" class="admin-panel space-y-4">
+                        <h3 class="text-xl font-bold">NEW TEAM MEMBER</h3>
+                        <input name="name" type="text" placeholder="NAME" class="admin-input hover-trigger" required>
+                        <input name="role" type="text" placeholder="ROLE" class="admin-input hover-trigger" required>
+                        <select name="color" class="admin-input hover-trigger">
+                            <option value="bg-acid">Red</option>
+                            <option value="bg-pink-600">Pink</option>
+                            <option value="bg-yellow-600">Yellow</option>
+                            <option value="bg-blue-600">Blue</option>
+                            <option value="bg-orange-600">Orange</option>
+                            <option value="bg-green-600">Green</option>
+                        </select>
+                        <button type="submit" class="admin-primary-button hover-trigger">ADD MEMBER</button>
+                    </form>
+
+                    <form id="project-form" class="admin-panel space-y-4">
+                        <h3 class="text-xl font-bold">NEW PROJECT</h3>
+                        <input name="title" type="text" placeholder="PROJECT TITLE" class="admin-input hover-trigger" required>
+                        <textarea name="description" rows="4" placeholder="DESCRIPTION" class="admin-input hover-trigger" required></textarea>
+                        <input name="image" type="text" placeholder="IMAGE PATH OR URL" class="admin-input hover-trigger">
+                        <button type="submit" class="admin-primary-button hover-trigger">ADD PROJECT</button>
+                    </form>
                 </div>
             </div>
         </div>
