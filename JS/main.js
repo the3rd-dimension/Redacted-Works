@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ADMIN_USERNAME = 'Kotrix';
-    const ADMIN_PASSWORD = 't3dIsGoat';
+    const ADMIN_PASSWORD = 'WhatIsThePassword?';
     const STORAGE_KEY = 'redactedWorksContent';
     const SESSION_KEY = 'redactedWorksAdminSession';
 
