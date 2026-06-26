@@ -1,0 +1,90 @@
+{
+  "announcements": [
+    {
+      "id": "announcement-scp-1025",
+      "date": "2025-12-17",
+      "tag": "NEW FEATURES",
+      "title": "Added SCP-1025 & New Diseases",
+      "body": "Current diseases: Common Cold - Slower Stamina Regen (0.25 Instead of normal 1). Lung Cancer- Works Like Common Cold. Somoge disease- works like common cold and lung cancer but after some time. Cardiac Arrest- Your heart beat speeds up until you die. A lot of new diseases are planned for future updates."
+    },
+    {
+      "id": "announcement-major-update",
+      "date": "2025-12-10",
+      "tag": "MAJOR_UPDATE",
+      "title": "New Collab & Multiple Major Updates",
+      "body": "COLABORATION WITH SCP CB Pelne Spolszczie (SCP CB IN POLISH LAUNGUAGE), IMPROVED MENU, IMPROVED NEW GAME CREATION DIFFICULTIES, SAFE EUCLID KETER, AUDIO SLIDERS, AJUSTABLE FOV, AJUSTABLE MOUSE SENSITIVITY, ADDED SAVE SLOTS, ADDED LAUNGUAGE SETTING, FIXED VOLUMETRIC FOG AND AMBIENT OCCLUSION, ADDED CROUCHING, WAKING UP ANIMATION, IMPROVED INTRO, ADDED CREDITS SEQUENCE, FIXED EVENT CHANCE, ADDED MORE PA SYSTEM DIALOGS IN INTRO SEQUENCE."
+    },
+    {
+      "id": "announcement-devlog-stream",
+      "date": "2025-08-11",
+      "tag": "DEVLOG",
+      "title": "DevLog Stream",
+      "body": "SCP CB Unreal Engine Remake Devlog Stream"
+    }
+  ],
+  "projects": [
+    {
+      "id": "project-scp-cb-ue5",
+      "title": "SCP CB UE5 Edition",
+      "description": "A complete port of the original SCP Containment Breach into UE5 with graphical improvements and addons.",
+      "image": "Assets/Media/SCP_CB_Cover.png"
+    },
+    {
+      "id": "project-scp-er",
+      "title": "SCP: ER",
+      "description": "A multiplayer SCP game where players play as characters from the SCP universe.",
+      "image": "Assets/Media/SCP_ER_Cover.png"
+    }
+  ],
+  "team": [
+    {
+      "id": "team-bartosz-kotecki",
+      "name": "Bartosz Kotecki",
+      "role": "Director & Founder",
+      "color": "bg-pink-600",
+      "highlight": true
+    },
+    {
+      "id": "team-the-3rd-dimension",
+      "name": "The 3rd Dimension",
+      "role": "Senior Programmer, 3D Artist & Web Designer",
+      "color": "bg-red-600",
+      "highlight": true
+    },
+    {
+      "id": "team-jagaaa",
+      "name": "jagaaa",
+      "role": "Programmer & Audio",
+      "color": "bg-yellow-600",
+      "highlight": false
+    },
+    {
+      "id": "team-skyer",
+      "name": "SKYER",
+      "role": "3D Artist",
+      "color": "bg-acid",
+      "highlight": false
+    },
+    {
+      "id": "team-a4110",
+      "name": "A4110",
+      "role": "Music & Audio",
+      "color": "bg-blue-600",
+      "highlight": false
+    },
+    {
+      "id": "team-alex1101",
+      "name": "Alex1101",
+      "role": "Music & Audio",
+      "color": "bg-blue-600",
+      "highlight": false
+    },
+    {
+      "id": "team-partyx01",
+      "name": "PartyX01",
+      "role": "Concept Artist",
+      "color": "bg-orange-600",
+      "highlight": false
+    }
+  ]
+}

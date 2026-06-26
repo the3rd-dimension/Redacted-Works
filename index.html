@@ -252,13 +252,15 @@
                 <form id="login-form" class="space-y-4">
                     <input id="admin-username" type="text" autocomplete="username" placeholder="USERNAME" class="admin-input hover-trigger" required>
                     <input id="admin-password" type="password" autocomplete="current-password" placeholder="PASSWORD" class="admin-input hover-trigger" required>
+                    <input id="github-token" type="password" autocomplete="off" placeholder="GITHUB TOKEN" class="admin-input hover-trigger" required>
                     <button type="submit" class="admin-primary-button hover-trigger">ENTER ADMIN MODE</button>
                     <p id="login-message" class="text-sm text-acid min-h-5"></p>
                 </form>
-                <p class="text-xs text-gray-600 mt-6">This section is only for Admin Usage</p>
+                <p class="text-xs text-gray-600 mt-6">Use a fine-grained GitHub token with Contents read/write access for this repository.</p>
             </div>
 
             <div id="admin-dashboard" class="hidden">
+                <p id="admin-status" class="text-sm text-gray-500 mb-6 min-h-5"></p>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <form id="announcement-form" class="admin-panel space-y-4">
                         <h3 class="text-xl font-bold">NEW ANNOUNCEMENT</h3>

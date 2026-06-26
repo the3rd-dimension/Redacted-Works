@@ -1,93 +1,150 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ADMIN_USERNAME = 'Kotrix';
     const ADMIN_PASSWORD = 'WhatIsThePassword?';
-    const STORAGE_KEY = 'redactedWorksContent';
+    const CONTENT_URL = 'data/content.json';
+    const CONTENT_PATH = 'data/content.json';
+    const GITHUB_OWNER = 'the3rd-dimension';
+    const GITHUB_REPO = 'Redacted-Works';
+    const GITHUB_BRANCH = 'main';
+    const CACHE_KEY = 'redactedWorksContentCache';
     const SESSION_KEY = 'redactedWorksAdminSession';
+    const TOKEN_KEY = 'redactedWorksGithubToken';
 
     const defaultContent = {
-        announcements: [
-            {
-                id: createId(),
-                date: '2025-12-17',
-                tag: 'NEW FEATURES',
-                title: 'Added SCP-1025 & New Diseases',
-                body: 'Current diseases: Common Cold - Slower Stamina Regen (0.25 Instead of normal 1). Lung Cancer- Works Like Common Cold. Somoge disease- works like common cold and lung cancer but after some time. Cardiac Arrest- Your heart beat speeds up until you die. A lot of new diseases are planned for future updates.'
-            },
-            {
-                id: createId(),
-                date: '2025-12-10',
-                tag: 'MAJOR_UPDATE',
-                title: 'New Collab & Multiple Major Updates',
-                body: 'COLABORATION WITH SCP CB Pelne Spolszczie (SCP CB IN POLISH LAUNGUAGE), IMPROVED MENU, IMPROVED NEW GAME CREATION DIFFICULTIES, SAFE EUCLID KETER, AUDIO SLIDERS, AJUSTABLE FOV, AJUSTABLE MOUSE SENSITIVITY, ADDED SAVE SLOTS, ADDED LAUNGUAGE SETTING, FIXED VOLUMETRIC FOG AND AMBIENT OCCLUSION, ADDED CROUCHING, WAKING UP ANIMATION, IMPROVED INTRO, ADDED CREDITS SEQUENCE, FIXED EVENT CHANCE, ADDED MORE PA SYSTEM DIALOGS IN INTRO SEQUENCE.'
-            },
-            {
-                id: createId(),
-                date: '2025-08-11',
-                tag: 'DEVLOG',
-                title: 'DevLog Stream',
-                body: 'SCP CB Unreal Engine Remake Devlog Stream'
-            }
-        ],
-        projects: [
-            {
-                id: createId(),
-                title: 'SCP CB UE5 Edition',
-                description: 'A complete port of the original SCP Containment Breach into UE5 with graphical improvements and addons.',
-                image: 'Assets/Media/SCP_CB_Cover.png'
-            },
-            {
-                id: createId(),
-                title: 'SCP: ER',
-                description: 'A multiplayer SCP game where players play as characters from the SCP universe.',
-                image: 'Assets/Media/SCP_ER_Cover.png'
-            }
-        ],
-        team: [
-            { id: createId(), name: 'Bartosz Kotecki', role: 'Director & Founder', color: 'bg-pink-600', highlight: true },
-            { id: createId(), name: 'The 3rd Dimension', role: 'Senior Programmer, 3D Artist & Web Designer', color: 'bg-red-600', highlight: true },
-            { id: createId(), name: 'jagaaa', role: 'Programmer & Audio', color: 'bg-yellow-600', highlight: false },
-            { id: createId(), name: 'SKYER', role: '3D Artist', color: 'bg-acid', highlight: false },
-            { id: createId(), name: 'A4110', role: 'Music & Audio', color: 'bg-blue-600', highlight: false },
-            { id: createId(), name: 'Alex1101', role: 'Music & Audio', color: 'bg-blue-600', highlight: false },
-            { id: createId(), name: 'PartyX01', role: 'Concept Artist', color: 'bg-orange-600', highlight: false }
-        ]
+        announcements: [],
+        projects: [],
+        team: []
     };
 
-    let content = loadContent();
+    let content = deepClone(defaultContent);
+    let isSaving = false;
 
-    function createId() {
+    function createId(prefix = 'item') {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-            return window.crypto.randomUUID();
+            return `${prefix}-${window.crypto.randomUUID()}`;
         }
 
-        return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     }
 
     function deepClone(value) {
         return JSON.parse(JSON.stringify(value));
     }
 
-    function loadContent() {
-        const savedContent = localStorage.getItem(STORAGE_KEY);
-        if (!savedContent) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultContent));
-            return deepClone(defaultContent);
+    function isLoggedIn() {
+        return sessionStorage.getItem(SESSION_KEY) === 'true' && Boolean(sessionStorage.getItem(TOKEN_KEY));
+    }
+
+    function setStatus(message, isError = false) {
+        const status = document.getElementById('admin-status');
+        const loginMessage = document.getElementById('login-message');
+
+        if (status) {
+            status.textContent = message || '';
+            status.classList.toggle('text-acid', isError);
+            status.classList.toggle('text-gray-500', !isError);
         }
+
+        if (loginMessage && isError) {
+            loginMessage.textContent = message || '';
+        }
+    }
+
+    async function loadContent() {
+        try {
+            const response = await fetch(`${CONTENT_URL}?v=${Date.now()}`, { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error(`Content request failed: ${response.status}`);
+            }
+
+            content = await response.json();
+            localStorage.setItem(CACHE_KEY, JSON.stringify(content));
+        } catch (error) {
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                content = JSON.parse(cached);
+                setStatus('Loaded cached content because the shared file could not be reached.', true);
+            } else {
+                content = deepClone(defaultContent);
+                setStatus('Shared content could not be loaded.', true);
+            }
+        }
+
+        renderContent();
+    }
+
+    function normalizeForGitHub(json) {
+        return JSON.stringify(json, null, 2) + '\n';
+    }
+
+    function encodeBase64(text) {
+        const bytes = new TextEncoder().encode(text);
+        let binary = '';
+        bytes.forEach((byte) => {
+            binary += String.fromCharCode(byte);
+        });
+        return btoa(binary);
+    }
+
+    async function githubRequest(url, options = {}) {
+        const token = sessionStorage.getItem(TOKEN_KEY);
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${token}`,
+                'X-GitHub-Api-Version': '2022-11-28',
+                ...(options.headers || {})
+            }
+        });
+
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : null;
+
+        if (!response.ok) {
+            const message = data && data.message ? data.message : `GitHub request failed: ${response.status}`;
+            throw new Error(message);
+        }
+
+        return data;
+    }
+
+    async function saveContentToGitHub(message) {
+        if (!isLoggedIn()) {
+            throw new Error('Admin login expired. Log in again.');
+        }
+
+        if (isSaving) {
+            throw new Error('A save is already in progress.');
+        }
+
+        isSaving = true;
+        setStatus('Saving to GitHub...');
+
+        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${CONTENT_PATH}`;
 
         try {
-            return JSON.parse(savedContent);
-        } catch {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultContent));
-            return deepClone(defaultContent);
+            const currentFile = await githubRequest(`${apiUrl}?ref=${GITHUB_BRANCH}`);
+            const body = {
+                message,
+                content: encodeBase64(normalizeForGitHub(content)),
+                sha: currentFile.sha,
+                branch: GITHUB_BRANCH
+            };
+
+            await githubRequest(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            localStorage.setItem(CACHE_KEY, JSON.stringify(content));
+            setStatus('Saved to GitHub. GitHub Pages may take a short moment to refresh.');
+        } finally {
+            isSaving = false;
         }
-    }
-
-    function saveContent() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
-    }
-
-    function isLoggedIn() {
-        return sessionStorage.getItem(SESSION_KEY) === 'true';
     }
 
     function formatDate(date) {
@@ -261,47 +318,82 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('admin-logout').classList.toggle('hidden', !loggedIn);
     }
 
-    function addItem(type, item) {
-        content[type].unshift({ id: createId(), ...item });
-        saveContent();
+    async function addItem(type, item) {
+        const beforeChange = deepClone(content);
+        content[type].unshift({ id: createId(type), ...item });
         renderContent();
+
+        try {
+            await saveContentToGitHub(`Update ${type} content`);
+        } catch (error) {
+            content = beforeChange;
+            renderContent();
+            setStatus(error.message, true);
+        }
     }
 
-    function removeItem(type, id) {
+    async function removeItem(type, id) {
+        const beforeChange = deepClone(content);
         content[type] = content[type].filter((item) => item.id !== id);
-        saveContent();
         renderContent();
+
+        try {
+            await saveContentToGitHub(`Remove ${type} content`);
+        } catch (error) {
+            content = beforeChange;
+            renderContent();
+            setStatus(error.message, true);
+        }
     }
 
     function wireAdminForms() {
         const loginForm = document.getElementById('login-form');
         const loginMessage = document.getElementById('login-message');
 
-        loginForm.addEventListener('submit', (event) => {
+        loginForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const username = document.getElementById('admin-username').value.trim();
             const password = document.getElementById('admin-password').value;
+            const token = document.getElementById('github-token').value.trim();
 
-            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-                sessionStorage.setItem(SESSION_KEY, 'true');
-                loginForm.reset();
-                loginMessage.textContent = '';
-                renderContent();
+            loginMessage.textContent = '';
+
+            if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+                loginMessage.textContent = 'ACCESS DENIED';
                 return;
             }
 
-            loginMessage.textContent = 'ACCESS DENIED';
+            if (!token) {
+                loginMessage.textContent = 'GITHUB TOKEN REQUIRED';
+                return;
+            }
+
+            sessionStorage.setItem(TOKEN_KEY, token);
+
+            try {
+                await githubRequest(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${CONTENT_PATH}?ref=${GITHUB_BRANCH}`);
+                sessionStorage.setItem(SESSION_KEY, 'true');
+                loginForm.reset();
+                renderContent();
+                setStatus('Admin mode active. Changes will be committed to GitHub.');
+            } catch (error) {
+                sessionStorage.removeItem(TOKEN_KEY);
+                sessionStorage.removeItem(SESSION_KEY);
+                loginMessage.textContent = error.message;
+            }
         });
 
         document.getElementById('admin-logout').addEventListener('click', () => {
+            sessionStorage.removeItem(TOKEN_KEY);
             sessionStorage.removeItem(SESSION_KEY);
             renderContent();
+            setStatus('');
         });
 
-        document.getElementById('announcement-form').addEventListener('submit', (event) => {
+        document.getElementById('announcement-form').addEventListener('submit', async (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
-            addItem('announcements', {
+            await addItem('announcements', {
                 date: formData.get('date'),
                 tag: formData.get('tag').trim().toUpperCase(),
                 title: formData.get('title').trim(),
@@ -311,10 +403,10 @@ document.addEventListener('DOMContentLoaded', () => {
             setTodayOnDateInput();
         });
 
-        document.getElementById('team-form').addEventListener('submit', (event) => {
+        document.getElementById('team-form').addEventListener('submit', async (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
-            addItem('team', {
+            await addItem('team', {
                 name: formData.get('name').trim(),
                 role: formData.get('role').trim(),
                 color: formData.get('color'),
@@ -323,10 +415,10 @@ document.addEventListener('DOMContentLoaded', () => {
             event.currentTarget.reset();
         });
 
-        document.getElementById('project-form').addEventListener('submit', (event) => {
+        document.getElementById('project-form').addEventListener('submit', async (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
-            addItem('projects', {
+            await addItem('projects', {
                 title: formData.get('title').trim(),
                 description: formData.get('description').trim(),
                 image: formData.get('image').trim() || 'Assets/Media/SCP_CB_Cover.png'
@@ -334,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event.currentTarget.reset();
         });
 
-        document.addEventListener('click', (event) => {
+        document.addEventListener('click', async (event) => {
             const deleteButton = event.target.closest('.admin-delete-button');
             if (!deleteButton || !isLoggedIn()) {
                 return;
@@ -342,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const confirmed = confirm('Remove this item?');
             if (confirmed) {
-                removeItem(deleteButton.dataset.type, deleteButton.dataset.id);
+                await removeItem(deleteButton.dataset.type, deleteButton.dataset.id);
             }
         });
     }
@@ -441,6 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
     wireAdminForms();
     setTodayOnDateInput();
     renderContent();
+    loadContent();
 
     // --- 3. GSAP Animations ---
     gsap.registerPlugin(ScrollTrigger);
